@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>편입 학습 체크리스트</title>
+<style>
+:root {
+  --bg: #f5f7fa; --white: #fff; --ink: #1a1d23; --muted: #8a8f9d; --border: #e4e8ef;
+  --econ-pri: #2563c7; --econ-light: #eff4ff; --econ-tag: #dbeafe;
+  --stat-pri: #0f8f6a; --stat-light: #edfaf4; --stat-tag: #d1fae5;
+  --step1: #f59e0b; --step2: #8b5cf6; --step3: #0ea5e9; --step4: #ef4444;
+  --r: 8px; --rl: 14px; --shadow: 0 1px 4px rgba(0,0,0,0.07),0 4px 16px rgba(0,0,0,0.04);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:80px;}
+
+/* topbar */
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:16px;height:54px;position:sticky;top:0;z-index:100;box-shadow:0 1px 0 var(--border);}
+.topbar-title{font-size:14px;font-weight:800;white-space:nowrap;}
+.topbar-sep{color:var(--border);font-size:16px;}
+.subject-tabs{display:flex;gap:5px;}
+.subject-tab{font-size:12.5px;font-weight:700;padding:5px 15px;border-radius:20px;border:1.5px solid var(--border);background:transparent;cursor:pointer;transition:all .15s;color:var(--muted);}
+.subject-tab[data-subject="econ"].active{background:var(--econ-light);border-color:var(--econ-pri);color:var(--econ-pri);}
+.subject-tab[data-subject="stat"].active{background:var(--stat-light);border-color:var(--stat-pri);color:var(--stat-pri);}
+.edit-toggle{margin-left:auto;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.edit-toggle.on{background:#fff8e1;border-color:#f59e0b;color:#92400e;}
+.progress-pill{font-size:12px;color:var(--muted);background:var(--bg);padding:4px 12px;border-radius:20px;border:1px solid var(--border);white-space:nowrap;}
+.progress-pill span{font-weight:700;color:var(--ink);}
+
+/* layout */
+.layout{display:grid;grid-template-columns:210px 1fr;max-width:1080px;margin:0 auto;padding:24px 20px 0;gap:0;}
+
+/* sidebar */
+.sidebar{padding-right:18px;position:sticky;top:72px;align-self:start;}
+.sidebar-label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;padding-left:4px;}
+.week-list{display:flex;flex-direction:column;gap:2px;}
+.week-btn{width:100%;text-align:left;font-size:13px;padding:8px 12px;border-radius:var(--r);border:none;background:transparent;cursor:pointer;color:var(--muted);font-weight:500;transition:all .12s;display:flex;align-items:center;gap:4px;}
+.week-btn:hover{background:var(--white);color:var(--ink);}
+.week-btn.active{font-weight:700;color:var(--ink);background:var(--white);box-shadow:var(--shadow);}
+.week-btn.active[data-s="econ"]{border-left:3px solid var(--econ-pri);}
+.week-btn.active[data-s="stat"]{border-left:3px solid var(--stat-pri);}
+.week-label-text{flex:1;}
+.w-badge{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:800;}
+.w-badge.done{background:#d1fae5;color:#065f46;}
+.w-badge.partial{background:#fef3c7;color:#92400e;}
+.w-del{font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 4px;border-radius:4px;opacity:0;transition:opacity .1s;flex-shrink:0;}
+.week-btn:hover .w-del{opacity:1;}
+.w-del:hover{color:#ef4444;background:#fee2e2;}
+.add-week-btn{width:100%;margin-top:8px;padding:7px 12px;border-radius:var(--r);border:1.5px dashed var(--border);background:transparent;color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .12s;}
+.add-week-btn:hover{border-color:var(--econ-pri);color:var(--econ-pri);background:var(--econ-light);}
+[data-subj="stat"] .add-week-btn:hover{border-color:var(--stat-pri);color:var(--stat-pri);background:var(--stat-light);}
+
+/* main */
+.main{min-width:0;}
+.week-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;}
+.week-title{font-size:20px;font-weight:800;line-height:1.25;}
+.week-sub{font-size:12.5px;color:var(--muted);margin-top:3px;}
+.week-pb-wrap{min-width:130px;text-align:right;}
+.week-pb-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.week-pb{height:5px;background:var(--border);border-radius:10px;overflow:hidden;}
+.week-pb-fill{height:100%;border-radius:10px;transition:width .4s;}
+
+/* notice */
+.notice-box{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.6;color:#374151;}
+
+/* step card */
+.step-card{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow);}
+.step-hd{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.step-num{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:3px 10px;border-radius:20px;color:#fff;flex-shrink:0;}
+.s1{background:var(--step1);} .s2{background:var(--step2);} .s3{background:var(--step3);} .s4{background:var(--step4);}
+.step-title-txt{font-size:14px;font-weight:700;flex:1;}
+.step-chev{font-size:11px;color:var(--muted);transition:transform .2s;}
+.step-card.collapsed .step-chev{transform:rotate(-90deg);}
+.step-card.collapsed .step-body{display:none;}
+.step-body{padding:18px 20px;}
+
+/* section label */
+.sec-lbl{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.sec-gap{margin-top:18px;}
+
+/* link list (step1,3,4) */
+.link-list{display:flex;flex-direction:column;gap:6px;}
+.link-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);transition:background .12s;}
+.link-row:hover{background:#f0f4ff;}
+.link-icon{font-size:14px;flex-shrink:0;}
+.link-anchor{font-size:13.5px;font-weight:600;color:var(--econ-pri);text-decoration:none;flex:1;}
+.link-anchor:hover{text-decoration:underline;}
+.stat-mode .link-anchor{color:var(--stat-pri);}
+/* edit mode link row */
+.link-row.editing{background:#fffbeb;border-color:#f59e0b;}
+.link-edit-inputs{display:flex;flex-direction:column;gap:4px;flex:1;}
+.link-inp{font-family:inherit;font-size:12.5px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);color:var(--ink);outline:none;width:100%;}
+.link-inp:focus{border-color:#f59e0b;}
+.link-add-btn{font-size:12px;font-weight:700;color:var(--muted);background:none;border:1.5px dashed var(--border);border-radius:var(--r);padding:6px 12px;cursor:pointer;width:100%;text-align:left;margin-top:4px;transition:all .12s;}
+.link-add-btn:hover{border-color:var(--econ-pri);color:var(--econ-pri);}
+.link-del-btn{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 5px;flex-shrink:0;}
+.link-del-btn:hover{color:#ef4444;}
+
+/* check items */
+.check-item{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border-radius:var(--r);transition:background .1s;margin-bottom:3px;cursor:pointer;}
+.check-item:hover{background:var(--bg);}
+.check-item input[type=checkbox]{width:16px;height:16px;border-radius:4px;margin-top:2px;cursor:pointer;flex-shrink:0;accent-color:var(--econ-pri);}
+.stat-mode .check-item input[type=checkbox]{accent-color:var(--stat-pri);}
+.check-lbl{font-size:13.5px;line-height:1.5;}
+.check-item.checked .check-lbl{color:var(--muted);text-decoration:line-through;}
+
+/* accordion concept / step3 item */
+.accordion-item{border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px;overflow:hidden;}
+.accordion-hd{display:flex;align-items:center;gap:8px;padding:10px 13px;cursor:pointer;background:var(--white);user-select:none;transition:background .1s;}
+.accordion-hd:hover{background:var(--bg);}
+.accordion-arrow{font-size:10px;color:var(--muted);transition:transform .2s;flex-shrink:0;}
+.accordion-item.open .accordion-arrow{transform:rotate(90deg);}
+.accordion-item:not(.open) .accordion-bd{display:none;}
+.accordion-title{font-size:13.5px;font-weight:700;flex:1;}
+.accordion-bd{padding:10px 14px 12px;border-top:1px solid var(--border);background:#fafafa;font-size:13px;line-height:1.7;color:#374151;white-space:pre-wrap;}
+/* edit mode accordion */
+.accordion-title-inp{font-family:inherit;font-size:13.5px;font-weight:700;border:none;background:transparent;color:var(--ink);outline:none;flex:1;min-width:0;}
+.accordion-title-inp:focus{background:#fffbeb;border-radius:4px;padding:0 4px;}
+.accordion-bd-inp{width:100%;min-height:72px;font-family:inherit;font-size:13px;line-height:1.7;color:#374151;border:1px solid #f59e0b;border-radius:4px;padding:8px 10px;background:#fffbeb;outline:none;resize:vertical;}
+.accordion-add-btn{font-size:12px;font-weight:700;color:var(--muted);background:none;border:1.5px dashed var(--border);border-radius:var(--r);padding:7px 12px;cursor:pointer;width:100%;text-align:left;margin-top:6px;transition:all .12s;}
+.accordion-add-btn:hover{border-color:var(--step2);color:var(--step2);}
+.item-del-btn{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 5px;flex-shrink:0;opacity:0;}
+.accordion-hd:hover .item-del-btn{opacity:1;}
+.item-del-btn:hover{color:#ef4444;}
+
+/* keyword tags */
+.kw-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:var(--r);}
+.kw-tag{font-size:11.5px;padding:3px 9px;border-radius:20px;font-weight:700;}
+.econ-mode .kw-tag{background:var(--econ-tag);color:var(--econ-pri);}
+.stat-mode .kw-tag{background:var(--stat-tag);color:var(--stat-pri);}
+.kw-inp{font-family:inherit;font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid #f59e0b;background:#fffbeb;outline:none;width:100%;}
+
+/* quiz guide */
+.quiz-guide{background:#fff8f0;border:1px solid #fde68a;border-radius:var(--r);padding:14px 16px;margin-top:12px;}
+.quiz-guide-title{font-size:12.5px;font-weight:800;color:#92400e;margin-bottom:8px;}
+.quiz-guide ul{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.quiz-guide ul li{font-size:12.5px;color:#78350f;line-height:1.5;display:flex;gap:6px;}
+.quiz-guide ul li::before{content:'•';color:#f59e0b;font-weight:700;flex-shrink:0;}
+
+/* edit hint */
+.edit-hint{font-size:11px;color:#92400e;background:#fff8e1;border-radius:4px;padding:4px 10px;margin-bottom:12px;display:none;}
+body.editing .edit-hint{display:block;}
+
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal{background:var(--white);border-radius:var(--rl);box-shadow:0 8px 40px rgba(0,0,0,.18);width:100%;max-width:440px;overflow:hidden;}
+.modal-hd{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-htitle{font-size:15px;font-weight:800;}
+.modal-x{width:28px;height:28px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;font-size:14px;color:var(--muted);}
+.modal-x:hover{background:var(--border);}
+.modal-bd{padding:18px 22px;display:flex;flex-direction:column;gap:12px;}
+.form-grp{display:flex;flex-direction:column;gap:4px;}
+.form-lbl{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;}
+.form-inp{font-family:inherit;font-size:13.5px;padding:8px 12px;border-radius:var(--r);border:1.5px solid var(--border);color:var(--ink);outline:none;transition:border-color .15s;}
+.form-inp:focus{border-color:#f59e0b;}
+.modal-ft{padding:12px 22px 18px;display:flex;justify-content:flex-end;gap:8px;}
+.mbtn{font-family:inherit;font-size:13px;font-weight:700;padding:8px 20px;border-radius:var(--r);border:1.5px solid var(--border);cursor:pointer;transition:all .12s;}
+.mbtn.cancel{background:var(--bg);color:var(--muted);}
+.mbtn.ok{background:var(--econ-pri);color:#fff;border-color:var(--econ-pri);}
+.mbtn.ok.stat{background:var(--stat-pri);border-color:var(--stat-pri);}
+.mbtn.ok:hover{opacity:.88;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">📚 편입 학습 체크리스트</div>
+  <div class="topbar-sep">|</div>
+  <div class="subject-tabs">
+    <button class="subject-tab active" data-subject="econ" onclick="switchSubject('econ')">경제수학</button>
+    <button class="subject-tab" data-subject="stat" onclick="switchSubject('stat')">수리통계학</button>
+  </div>
+  <button class="edit-toggle" id="editToggle" onclick="toggleEdit()">✏️ 편집 모드</button>
+  <div class="progress-pill">전체 진도 <span id="topPct">0%</span></div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-label">주차 선택</div>
+    <div class="week-list" id="weekList"></div>
+  </aside>
+  <main class="main" id="mainContent"></main>
+</div>
+
+<!-- Add Week Modal -->
+<div class="modal-overlay hidden" id="addWeekModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-htitle">➕ 새 주차 추가</div>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="form-grp"><label class="form-lbl">주차 이름 *</label><input class="form-inp" id="mLabel" placeholder="예: Week 6" maxlength="20"></div>
+      <div class="form-grp"><label class="form-lbl">단원 제목 *</label><input class="form-inp" id="mTitle" placeholder="예: 다중회귀분석" maxlength="50"></div>
+      <div class="form-grp"><label class="form-lbl">부제목</label><input class="form-inp" id="mSub" placeholder="예: OLS 추정량, 다중공선성" maxlength="60"></div>
+      <div class="form-grp"><label class="form-lbl">공지사항</label><input class="form-inp" id="mNotice" placeholder="이번 주 안내사항 (선택)" maxlength="120"></div>
+      <div class="form-grp"><label class="form-lbl">키워드 (쉼표로 구분)</label><input class="form-inp" id="mKw" placeholder="예: OLS, 잔차, 결정계수"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="mbtn cancel" onclick="closeModal()">취소</button>
+      <button class="mbtn ok" id="mOkBtn" onclick="confirmAddWeek()">추가하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   DEFAULT DATA
+══════════════════════════════════════ */
+const DEFAULTS = {
+  econ: {
+    label:'경제수학', colorClass:'econ-mode', dotClass:'econ-dot',
+    weeks:[
+      { id:'e1', label:'Week 1', title:'선형대수 기초', subtitle:'행렬, 행렬식, 역행렬', notice:'개념 이해 중심 주차입니다. 증명까지 완벽히 이해하세요.',
+        keywords:['행렬','행렬식','역행렬','소행렬식','여인수'],
+        step1Links:[{text:'강의 영상',url:''},{text:'강의 슬라이드',url:''},{text:'판서본',url:''}],
+        concepts:[{title:'행렬의 기본 연산',desc:'덧셈, 스칼라곱, 곱셈의 정의와 성질'},{title:'행렬식 (코팩터 전개)',desc:'n×n 행렬식을 여인수 전개로 계산하는 방법'}],
+        step3Items:[{title:'#1. 정의(Definition) 확인',desc:'이번 주 핵심 정의들을 직접 써보며 확인'},{title:'#2. 의미 & 개념 구분',desc:'유사한 개념들의 차이를 정리'},{title:'#3. 문제 적용',desc:'배운 개념을 연습문제에 적용'}],
+        step3Links:[{text:'연습문제 PDF',url:''},{text:'Solution PDF',url:''}],
+        step4Links:[{text:'Week 1 QUIZ',url:''}]
+      },
+      { id:'e2', label:'Week 2', title:'고유값과 고유벡터', subtitle:'대각화, 이차형식', notice:'편입 시험에서 자주 출제되는 핵심 단원입니다.',
+        keywords:['eigenvalue','eigenvector','대각화','이차형식','양정치'],
+        step1Links:[{text:'강의 영상',url:''},{text:'강의 슬라이드',url:''},{text:'판서본',url:''}],
+        concepts:[{title:'특성방정식과 고유값',desc:'det(A−λI)=0을 풀어 고유값 구하기'},{title:'대각화 가능 조건',desc:'n개의 선형독립 고유벡터 존재 여부'}],
+        step3Items:[{title:'#1. 정의 확인',desc:''},{title:'#2. 개념 구분',desc:''},{title:'#3. 문제 적용',desc:''}],
+        step3Links:[{text:'연습문제 PDF',url:''},{text:'Solution PDF',url:''}],
+        step4Links:[{text:'Week 2 QUIZ',url:''}]
+      },
+    ]
+  },
+  stat: {
+    label:'수리통계학', colorClass:'stat-mode', dotClass:'stat-dot',
+    weeks:[
+      { id:'s1', label:'Week 1', title:'Ch.1 확률과 분포 I', subtitle:'집합론, 확률의 공리, 조건부확률', notice:'KOCW 김충락 교수님 강의 기반. Hogg 6판 Ch.1과 함께 보세요.',
+        keywords:['σ-field','확률공리','조건부확률','독립','베이즈 정리'],
+        step1Links:[{text:'KOCW 수리통계학 Ch.1 강의',url:''},{text:'Ch.1 강의 슬라이드',url:''},{text:'Ch.1 판서본',url:''}],
+        concepts:[{title:'σ-field의 정의와 예시 (§1.3)',desc:'세 가지 조건: ∅ 포함, 여집합에 닫힘, 가산합집합에 닫힘'},{title:'확률의 3가지 공리 (§1.3)',desc:'비음성, 정규성, 가산가법성 — Kolmogorov 공리'},{title:'베이즈 정리 (§1.4)',desc:'P(Cⱼ|C) = P(Cⱼ)P(C|Cⱼ) / Σ P(Cᵢ)P(C|Cᵢ)\n사전확률 × 우도 / 전체확률'}],
+        step3Items:[{title:'#1. 정의(Definition) 확인',desc:'σ-field, 확률함수, 조건부확률 정의를 직접 적어보기'},{title:'#2. 의미 & 개념 구분',desc:'error vs residual, 사전확률 vs 사후확률 구분'},{title:'#3. 문제 적용',desc:'Thm 1.3.1~1.3.7 증명 직접 재현'}],
+        step3Links:[{text:'Ch.1 연습문제 PDF',url:''},{text:'Ch.1 Solution PDF',url:''}],
+        step4Links:[{text:'Week 1 QUIZ',url:''}]
+      },
+      { id:'s2', label:'Week 2', title:'Ch.1 확률과 분포 II', subtitle:'확률변수, CDF, 기댓값, MGF', notice:'',
+        keywords:['확률변수','CDF','PMF','PDF','기댓값','MGF'],
+        step1Links:[{text:'KOCW 수리통계학 Ch.1 (후반부)',url:''},{text:'강의 슬라이드',url:''},{text:'판서본',url:''}],
+        concepts:[{title:'CDF의 4가지 성질 (§1.5)',desc:'(a) 단조비감소\n(b) lim_{x→-∞} F(x)=0\n(c) lim_{x→+∞} F(x)=1\n(d) 우연속'},{title:'변수변환 (§1.7 Thm 1.7.1)',desc:'Y=g(X)일 때 fᵧ(y) = fₓ(g⁻¹(y))|dx/dy|\ng가 순증가/순감소 각각 CDF법으로 유도 후 통합'},{title:'MGF의 역할 (§1.9)',desc:'M(t)=E(e^{tX}), |t|<h\nE(Xᵐ) = M^(m)(0)\n유일성 정리: 같은 MGF → 같은 분포'}],
+        step3Items:[{title:'#1. 정의 확인',desc:'CDF, PMF, PDF, MGF 각각의 정의 직접 쓰기'},{title:'#2. 개념 구분',desc:'이산 vs 연속, error vs residual, MGF vs CGF'},{title:'#3. 문제 적용',desc:'Ex 1.7.1~1.7.5 변수변환 직접 풀기'}],
+        step3Links:[{text:'Ch.1 연습문제 PDF',url:''},{text:'Ch.1 Solution PDF',url:''}],
+        step4Links:[{text:'Week 2 QUIZ',url:''}]
+      },
+    ]
+  }
+};
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let currentSubject = 'econ';
+let currentWeekId  = 'e1';
+let editMode = false;
+
+function loadData() {
+  const saved = JSON.parse(localStorage.getItem('clData') || 'null');
+  if (!saved) return JSON.parse(JSON.stringify(DEFAULTS));
+  return saved;
+}
+function saveData() { localStorage.setItem('clData', JSON.stringify(DATA)); }
+
+let DATA = loadData();
+let checks = JSON.parse(localStorage.getItem('clChecks') || '{}');
+function saveChecks() { localStorage.setItem('clChecks', JSON.stringify(checks)); }
+
+function curSubj() { return DATA[currentSubject]; }
+function curWeek() { return curSubj().weeks.find(w => w.id === currentWeekId); }
+
+/* ══════════════════════════════════════
+   PROGRESS
+══════════════════════════════════════ */
+function weekCheckKeys(w) {
+  const keys = ['step1','step3ex','step3sol','step4'];
+  return keys;
+}
+function weekPct(subj, w) {
+  const keys = weekCheckKeys(w);
+  const done = keys.filter(k => checks[`${subj}_${w.id}_${k}`]).length;
+  return Math.round(done / keys.length * 100);
+}
+function updateTopPct() {
+  const subj = DATA[currentSubject];
+  let total=0, done=0;
+  subj.weeks.forEach(w => {
+    const keys = weekCheckKeys(w);
+    total += keys.length;
+    done += keys.filter(k => checks[`${currentSubject}_${w.id}_${k}`]).length;
+  });
+  document.getElementById('topPct').textContent = (total ? Math.round(done/total*100) : 0) + '%';
+}
+
+/* ══════════════════════════════════════
+   EDIT MODE
+══════════════════════════════════════ */
+function toggleEdit() {
+  editMode = !editMode;
+  document.body.classList.toggle('editing', editMode);
+  const btn = document.getElementById('editToggle');
+  btn.textContent = editMode ? '✅ 편집 완료' : '✏️ 편집 모드';
+  btn.classList.toggle('on', editMode);
+  renderMain();
+}
+
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+function renderSidebar() {
+  const subj = DATA[currentSubject];
+  const defaultIds = new Set(DEFAULTS[currentSubject].weeks.map(w=>w.id));
+  let html = subj.weeks.map(w => {
+    const pct = weekPct(currentSubject, w);
+    const badge = pct===100 ? '<span class="w-badge done">완료</span>'
+                : pct>0    ? '<span class="w-badge partial">진행중</span>' : '';
+    const isCustom = !defaultIds.has(w.id);
+    const delBtn = isCustom ? `<button class="w-del" onclick="event.stopPropagation();deleteWeek('${w.id}')" title="삭제">✕</button>` : '';
+    return `<button class="week-btn ${w.id===currentWeekId?'active':''}" data-s="${currentSubject}" onclick="switchWeek('${w.id}')">
+      <span class="week-label-text">${w.label}</span>${badge}${delBtn}
+    </button>`;
+  }).join('');
+  html += `<button class="add-week-btn" onclick="openAddModal()">＋ 주차 추가</button>`;
+  document.getElementById('weekList').innerHTML = html;
+  document.getElementById('sidebar').setAttribute('data-subj', currentSubject);
+}
+
+/* ══════════════════════════════════════
+   MAIN RENDER
+══════════════════════════════════════ */
+function renderMain() {
+  const subj = curSubj();
+  const week = curWeek();
+  if (!week) return;
+  const sc = subj.colorClass;
+  const pct = weekPct(currentSubject, week);
+  const pri = currentSubject==='stat' ? 'var(--stat-pri)' : 'var(--econ-pri)';
+  const isChecked = k => !!checks[`${currentSubject}_${week.id}_${k}`];
+
+  /* ── Step 1 links ── */
+  const s1Links = editMode
+    ? week.step1Links.map((l,i) => `
+        <div class="link-row editing">
+          <span class="link-icon">🔗</span>
+          <div class="link-edit-inputs">
+            <input class="link-inp" placeholder="링크 텍스트" value="${esc(l.text)}"
+              oninput="updateLink('step1Links',${i},'text',this.value)">
+            <input class="link-inp" placeholder="URL (https://...)" value="${esc(l.url)}"
+              oninput="updateLink('step1Links',${i},'url',this.value)">
+          </div>
+          <button class="link-del-btn" onclick="deleteLink('step1Links',${i})">✕</button>
+        </div>`).join('')
+      + `<button class="link-add-btn" onclick="addLink('step1Links')">＋ 링크 추가</button>`
+    : week.step1Links.map(l => `
+        <div class="link-row">
+          <span class="link-icon">🔗</span>
+          ${l.url ? `<a href="${esc(l.url)}" class="link-anchor ${sc}" target="_blank">${esc(l.text)}</a>`
+                  : `<span class="link-anchor ${sc}" style="opacity:.5;cursor:default">${esc(l.text)} (링크 미설정)</span>`}
+        </div>`).join('');
+
+  /* ── Step 2 concepts ── */
+  const s2Concepts = week.concepts.map((c,i) => {
+    if (editMode) return `
+      <div class="accordion-item open">
+        <div class="accordion-hd">
+          <span class="accordion-arrow">▶</span>
+          <input class="accordion-title-inp" placeholder="개념 제목" value="${esc(c.title)}"
+            oninput="updateConcept(${i},'title',this.value)">
+          <button class="item-del-btn" onclick="deleteConcept(${i})">✕</button>
+        </div>
+        <div class="accordion-bd">
+          <textarea class="accordion-bd-inp" placeholder="상세 설명을 입력하세요..."
+            oninput="updateConcept(${i},'desc',this.value)">${esc(c.desc)}</textarea>
+        </div>
+      </div>`;
+    return `
+      <div class="accordion-item" id="ac2_${i}">
+        <div class="accordion-hd" onclick="toggleAc('ac2_${i}')">
+          <span class="accordion-arrow">▶</span>
+          <span class="accordion-title">${esc(c.title)}</span>
+        </div>
+        <div class="accordion-bd">${esc(c.desc)||'(설명 없음)'}</div>
+      </div>`;
+  }).join('');
+
+  /* ── Keywords ── */
+  const kwSection = editMode
+    ? `<div class="kw-wrap"><input class="kw-inp" placeholder="키워드를 쉼표로 구분하여 입력 (예: OLS, 잔차, R²)"
+        value="${esc(week.keywords.join(', '))}"
+        oninput="updateKeywords(this.value)"></div>`
+    : `<div class="kw-wrap ${sc}">
+        <span style="font-size:10.5px;font-weight:800;color:var(--muted);margin-right:4px;">키워드</span>
+        ${week.keywords.map(k=>`<span class="kw-tag">${esc(k)}</span>`).join('')}
+       </div>`;
+
+  /* ── Step 3 concept check items ── */
+  const s3Items = week.step3Items.map((it,i) => {
+    if (editMode) return `
+      <div class="accordion-item open">
+        <div class="accordion-hd">
+          <span class="accordion-arrow">▶</span>
+          <input class="accordion-title-inp" placeholder="항목 제목" value="${esc(it.title)}"
+            oninput="updateS3Item(${i},'title',this.value)">
+          <button class="item-del-btn" onclick="deleteS3Item(${i})">✕</button>
+        </div>
+        <div class="accordion-bd">
+          <textarea class="accordion-bd-inp" placeholder="상세 내용..."
+            oninput="updateS3Item(${i},'desc',this.value)">${esc(it.desc)}</textarea>
+        </div>
+      </div>`;
+    return `
+      <div class="accordion-item" id="ac3_${i}">
+        <div class="accordion-hd" onclick="toggleAc('ac3_${i}')">
+          <span class="accordion-arrow">▶</span>
+          <span class="accordion-title">${esc(it.title)}</span>
+        </div>
+        ${it.desc ? `<div class="accordion-bd">${esc(it.desc)}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  /* ── Step 3 exercise links ── */
+  const s3Links = editMode
+    ? week.step3Links.map((l,i) => `
+        <div class="link-row editing">
+          <span class="link-icon">📄</span>
+          <div class="link-edit-inputs">
+            <input class="link-inp" placeholder="링크 텍스트" value="${esc(l.text)}"
+              oninput="updateLink('step3Links',${i},'text',this.value)">
+            <input class="link-inp" placeholder="URL" value="${esc(l.url)}"
+              oninput="updateLink('step3Links',${i},'url',this.value)">
+          </div>
+          <button class="link-del-btn" onclick="deleteLink('step3Links',${i})">✕</button>
+        </div>`).join('')
+      + `<button class="link-add-btn" onclick="addLink('step3Links')">＋ 링크 추가</button>`
+    : week.step3Links.map(l => `
+        <div class="link-row">
+          <span class="link-icon">📄</span>
+          ${l.url ? `<a href="${esc(l.url)}" class="link-anchor ${sc}" target="_blank">${esc(l.text)}</a>`
+                  : `<span class="link-anchor ${sc}" style="opacity:.5;cursor:default">${esc(l.text)} (링크 미설정)</span>`}
+        </div>`).join('');
+
+  /* ── Step 4 links ── */
+  const s4Links = editMode
+    ? week.step4Links.map((l,i) => `
+        <div class="link-row editing">
+          <span class="link-icon">📝</span>
+          <div class="link-edit-inputs">
+            <input class="link-inp" placeholder="링크 텍스트" value="${esc(l.text)}"
+              oninput="updateLink('step4Links',${i},'text',this.value)">
+            <input class="link-inp" placeholder="URL" value="${esc(l.url)}"
+              oninput="updateLink('step4Links',${i},'url',this.value)">
+          </div>
+          <button class="link-del-btn" onclick="deleteLink('step4Links',${i})">✕</button>
+        </div>`).join('')
+      + `<button class="link-add-btn" onclick="addLink('step4Links')">＋ 링크 추가</button>`
+    : week.step4Links.map(l => `
+        <div class="link-row">
+          <span class="link-icon">📝</span>
+          ${l.url ? `<a href="${esc(l.url)}" class="link-anchor ${sc}" target="_blank">${esc(l.text)}</a>`
+                  : `<span class="link-anchor ${sc}" style="opacity:.5;cursor:default">${esc(l.text)} (링크 미설정)</span>`}
+        </div>`).join('');
+
+  document.getElementById('mainContent').innerHTML = `
+  <div class="${sc}">
+    <!-- Header -->
+    <div class="week-header">
+      <div>
+        ${editMode
+          ? `<input style="font-size:18px;font-weight:800;border:1px solid #f59e0b;border-radius:6px;padding:3px 8px;background:#fffbeb;font-family:inherit;outline:none;width:100%"
+               value="${esc(week.title)}" oninput="updateWeekField('title',this.value)">
+             <input style="font-size:12px;margin-top:6px;display:block;border:1px solid var(--border);border-radius:4px;padding:3px 8px;font-family:inherit;outline:none;width:100%;color:var(--muted)"
+               value="${esc(week.subtitle)}" placeholder="부제목" oninput="updateWeekField('subtitle',this.value)">`
+          : `<div class="week-title">${esc(week.label)} — ${esc(week.title)}</div>
+             <div class="week-sub">${esc(week.subtitle)}</div>`}
+      </div>
+      <div class="week-pb-wrap">
+        <div class="week-pb-label" id="wbLabel">진도 ${pct}%</div>
+        <div class="week-pb"><div class="week-pb-fill" id="wbFill" style="width:${pct}%;background:${pri}"></div></div>
+      </div>
+    </div>
+
+    ${week.notice ? `<div class="notice-box"><span style="font-size:16px">📢</span><span>${editMode
+      ? `<input style="border:1px solid #f59e0b;border-radius:4px;padding:3px 8px;background:#fffbeb;font-family:inherit;font-size:13px;outline:none;width:100%"
+           value="${esc(week.notice)}" oninput="updateWeekField('notice',this.value)">`
+      : esc(week.notice)}</span></div>` : editMode ? `<div class="notice-box"><span style="font-size:16px">📢</span>
+      <input style="border:1px solid #f59e0b;border-radius:4px;padding:3px 8px;background:#fffbeb;font-family:inherit;font-size:13px;outline:none;width:100%"
+        value="" placeholder="공지사항 입력 (선택)" oninput="updateWeekField('notice',this.value)"></div>` : ''}
+
+    ${editMode ? '<div class="edit-hint">✏️ 편집 모드 — 입력 후 자동 저장됩니다.</div>' : ''}
+
+    <!-- STEP 1 -->
+    <div class="step-card" id="cs1">
+      <div class="step-hd" onclick="toggleStep('cs1')">
+        <span class="step-num s1">Step 1</span>
+        <span class="step-title-txt">강의 수강</span>
+        <span class="step-chev">▼</span>
+      </div>
+      <div class="step-body">
+        <div class="sec-lbl">강의노트 · 슬라이드 · 판서본</div>
+        <div class="check-item ${isChecked('step1')?'checked':''}" onclick="toggleCheck('step1')">
+          <input type="checkbox" ${isChecked('step1')?'checked':''} onclick="event.stopPropagation();toggleCheck('step1')">
+          <span class="check-lbl">${esc(week.label)} 강의 시청: ${esc(week.title)}</span>
+        </div>
+        <div class="link-list" style="margin-top:8px;margin-left:4px">${s1Links}</div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step-card" id="cs2">
+      <div class="step-hd" onclick="toggleStep('cs2')">
+        <span class="step-num s2">Step 2</span>
+        <span class="step-title-txt">중요 개념 정리</span>
+        <span class="step-chev">▼</span>
+      </div>
+      <div class="step-body">
+        <div class="sec-lbl">이번 주 핵심 개념</div>
+        ${s2Concepts}
+        ${editMode ? `<button class="accordion-add-btn" onclick="addConcept()">＋ 개념 추가</button>` : ''}
+        ${kwSection}
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step-card" id="cs3">
+      <div class="step-hd" onclick="toggleStep('cs3')">
+        <span class="step-num s3">Step 3</span>
+        <span class="step-title-txt">개념 복습 & 연습문제</span>
+        <span class="step-chev">▼</span>
+      </div>
+      <div class="step-body">
+        <div class="sec-lbl">숙제 이전 개념 점검</div>
+        ${s3Items}
+        ${editMode ? `<button class="accordion-add-btn" style="border-color:var(--step3);color:var(--step3)" onclick="addS3Item()">＋ 항목 추가</button>` : ''}
+
+        <div class="sec-gap"></div>
+        <div class="sec-lbl">금주의 연습문제</div>
+        <div class="check-item ${isChecked('step3ex')?'checked':''}" onclick="toggleCheck('step3ex')">
+          <input type="checkbox" ${isChecked('step3ex')?'checked':''} onclick="event.stopPropagation();toggleCheck('step3ex')">
+          <span class="check-lbl">${esc(week.label)} 연습문제 풀기</span>
+        </div>
+        <div class="check-item ${isChecked('step3sol')?'checked':''}" onclick="toggleCheck('step3sol')" style="margin-top:2px">
+          <input type="checkbox" ${isChecked('step3sol')?'checked':''} onclick="event.stopPropagation();toggleCheck('step3sol')">
+          <span class="check-lbl">풀이 확인 (Solution)</span>
+        </div>
+        <div class="link-list" style="margin-top:10px">${s3Links}</div>
+        <div style="margin-top:12px;padding:9px 12px;background:var(--bg);border-radius:6px;font-size:12px;color:var(--muted);line-height:1.6">
+          아래 가이드라인을 참고하여 풀이를 진행하세요. <strong style="color:var(--ink)">"+"</strong>가 붙은 문제는 고난이도입니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-card" id="cs4">
+      <div class="step-hd" onclick="toggleStep('cs4')">
+        <span class="step-num s4">Step 4</span>
+        <span class="step-title-txt">QUIZ 풀이 &amp; 제출</span>
+        <span class="step-chev">▼</span>
+      </div>
+      <div class="step-body">
+        <div class="sec-lbl">실전 문제 QUIZ</div>
+        <div class="check-item ${isChecked('step4')?'checked':''}" onclick="toggleCheck('step4')">
+          <input type="checkbox" ${isChecked('step4')?'checked':''} onclick="event.stopPropagation();toggleCheck('step4')">
+          <span class="check-lbl">${esc(week.label)} 실전 QUIZ 응시 및 제출</span>
+        </div>
+        <div class="link-list" style="margin-top:10px">${s4Links}</div>
+        <div class="quiz-guide">
+          <div class="quiz-guide-title">📝 퀴즈 풀이 가이드라인</div>
+          <ul>
+            <li>퀴즈는 30분의 제한 시간을 설정한 뒤 풀어주세요.</li>
+            <li>복습 과정에서 강의노트 참고 및 AI 질문은 가능합니다.</li>
+            <li>퀴즈 풀이 중에는 <strong>온전히 본인의 실력대로</strong> 풀어주세요.</li>
+            <li>AI 사용, 교재나 필기 참고는 엄밀히 금합니다.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ══════════════════════════════════════
+   TOGGLE HELPERS
+══════════════════════════════════════ */
+function toggleStep(id) { document.getElementById(id).classList.toggle('collapsed'); }
+function toggleAc(id) { document.getElementById(id).classList.toggle('open'); }
+
+function toggleCheck(key) {
+  const fk = `${currentSubject}_${currentWeekId}_${key}`;
+  checks[fk] = !checks[fk];
+  saveChecks();
+  const item = document.querySelector(`.check-item[onclick*="${key}"]`);
+  if (item) item.classList.toggle('checked', !!checks[fk]);
+  const cb = item?.querySelector('input[type=checkbox]');
+  if (cb) cb.checked = !!checks[fk];
+  const pct = weekPct(currentSubject, curWeek());
+  const pri = currentSubject==='stat' ? 'var(--stat-pri)' : 'var(--econ-pri)';
+  const fill = document.getElementById('wbFill');
+  const lbl  = document.getElementById('wbLabel');
+  if (fill) { fill.style.width = pct+'%'; fill.style.background = pri; }
+  if (lbl)  lbl.textContent = `진도 ${pct}%`;
+  renderSidebar();
+  updateTopPct();
+}
+
+/* ══════════════════════════════════════
+   INLINE EDIT HELPERS
+══════════════════════════════════════ */
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function updateWeekField(field, val) {
+  curWeek()[field] = val; saveData();
+}
+function updateKeywords(val) {
+  curWeek().keywords = val.split(',').map(k=>k.trim()).filter(Boolean); saveData();
+}
+function updateConcept(i, field, val) {
+  curWeek().concepts[i][field] = val; saveData();
+}
+function addConcept() {
+  curWeek().concepts.push({title:'새 개념', desc:''}); saveData(); renderMain();
+}
+function deleteConcept(i) {
+  curWeek().concepts.splice(i,1); saveData(); renderMain();
+}
+function updateS3Item(i, field, val) {
+  curWeek().step3Items[i][field] = val; saveData();
+}
+function addS3Item() {
+  curWeek().step3Items.push({title:'새 항목', desc:''}); saveData(); renderMain();
+}
+function deleteS3Item(i) {
+  curWeek().step3Items.splice(i,1); saveData(); renderMain();
+}
+function updateLink(listKey, i, field, val) {
+  curWeek()[listKey][i][field] = val; saveData();
+}
+function addLink(listKey) {
+  curWeek()[listKey].push({text:'', url:''}); saveData(); renderMain();
+}
+function deleteLink(listKey, i) {
+  curWeek()[listKey].splice(i,1); saveData(); renderMain();
+}
+
+/* ══════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════ */
+function switchSubject(subj) {
+  currentSubject = subj;
+  currentWeekId = DATA[subj].weeks[0].id;
+  document.querySelectorAll('.subject-tab').forEach(t => t.classList.toggle('active', t.dataset.subject===subj));
+  renderSidebar(); renderMain(); updateTopPct();
+}
+function switchWeek(id) {
+  currentWeekId = id; renderSidebar(); renderMain();
+}
+
+/* ══════════════════════════════════════
+   ADD / DELETE WEEK
+══════════════════════════════════════ */
+function openAddModal() {
+  const n = DATA[currentSubject].weeks.length + 1;
+  document.getElementById('mLabel').value = `Week ${n}`;
+  document.getElementById('mTitle').value = '';
+  document.getElementById('mSub').value = '';
+  document.getElementById('mNotice').value = '';
+  document.getElementById('mKw').value = '';
+  document.getElementById('mOkBtn').className = 'mbtn ok' + (currentSubject==='stat'?' stat':'');
+  document.getElementById('addWeekModal').classList.remove('hidden');
+  document.getElementById('mTitle').focus();
+}
+function closeModal() { document.getElementById('addWeekModal').classList.add('hidden'); }
+document.getElementById('addWeekModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+function confirmAddWeek() {
+  const label = document.getElementById('mLabel').value.trim();
+  const title = document.getElementById('mTitle').value.trim();
+  if (!label||!title) { alert('주차 이름과 단원 제목은 필수입니다.'); return; }
+  const id = `custom_${Date.now()}`;
+  const kw = document.getElementById('mKw').value.trim();
+  DATA[currentSubject].weeks.push({
+    id, label, title,
+    subtitle: document.getElementById('mSub').value.trim(),
+    notice:   document.getElementById('mNotice').value.trim(),
+    keywords: kw ? kw.split(',').map(k=>k.trim()).filter(Boolean) : [],
+    step1Links: [{text:'강의 영상',url:''},{text:'강의 슬라이드',url:''},{text:'판서본',url:''}],
+    concepts:   [{title:'개념 1',desc:''}],
+    step3Items: [{title:'#1. 정의 확인',desc:''},{title:'#2. 개념 구분',desc:''},{title:'#3. 문제 적용',desc:''}],
+    step3Links: [{text:'연습문제 PDF',url:''},{text:'Solution PDF',url:''}],
+    step4Links: [{text:`${label} QUIZ`,url:''}]
+  });
+  saveData();
+  currentWeekId = id;
+  closeModal(); renderSidebar(); renderMain(); updateTopPct();
+}
+
+function deleteWeek(id) {
+  if (!confirm('이 주차를 삭제할까요?')) return;
+  DATA[currentSubject].weeks = DATA[currentSubject].weeks.filter(w=>w.id!==id);
+  saveData();
+  currentWeekId = DATA[currentSubject].weeks[0]?.id;
+  renderSidebar(); renderMain(); updateTopPct();
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+renderSidebar(); renderMain(); updateTopPct();
+</script>
+</body>
+</html>
